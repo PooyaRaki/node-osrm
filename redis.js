@@ -15,17 +15,19 @@ module.exports = class Redis {
      * Initialize a new redis connection.
      */
     constructor() {
-        this.db = pRedis.createClient({
-            host: Config.redis.host,
-            port: Config.redis.port,
-            password: Config.redis.password
-        });
-        this.db.on('error', () => {
-            return false;
-        });
-        this.db.select(0);
-        this.getAsync = util.promisify(this.db.get).bind(this.db);
-        this.checkAsync = util.promisify(this.db.exists).bind(this.db);
+        if( Config.core.cache === true ) {
+            this.db = pRedis.createClient({
+                host: Config.redis.host,
+                port: Config.redis.port,
+                password: Config.redis.password
+            });
+            this.db.on('error', () => {
+                return false;
+            });
+            this.db.select(0);
+            this.getAsync = util.promisify(this.db.get).bind(this.db);
+            this.checkAsync = util.promisify(this.db.exists).bind(this.db);
+        }
     }
 
     /**
@@ -58,6 +60,12 @@ module.exports = class Redis {
      * @param callback
      */
     fetch(key, callback) {
+        if( Config.core.cache === false ) {
+            callback(null);
+
+            return false;
+        }
+
         this.getAsync(key).then( (result) => {
             callback(result, undefined);
         }).catch( (err) => {
@@ -72,6 +80,11 @@ module.exports = class Redis {
      * @param expiration Expiration Time Default is 1 Day = 86400 Seconds
      */
     writeCache(key, value, expiration = 86400) {
+        if( Config.core.cache === false ) {
+
+            return false;
+        }
+
         let result = this.db.setex(key, expiration, value);
         this.db.quit();
         return result;
