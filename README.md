@@ -29,4 +29,14 @@ If you prefer to keep caching turned on there is a redis client already written 
     };
     
     
-In case of any problem running this app just let me know.
+The url scheme is like this:
+
+    http://SERVER/{method}/?{options}
+
+Example:
+
+    http://SERVER/match/?coordinates=35.73613,51.33831;35.73570,51.33982&timestamps=1530632548;1530632558&radiuses=15;20&overview=simplified&geometries=geojson&steps=0
+    
+    http://SERVER/route/?coordinates=35.73613,51.33831;35.73570,51.33982;35.73578,51.34164&overview=false&geometries=geojson&steps=0
+    
+In case of any difficulty running this app just let me know. The document is still being updated.
