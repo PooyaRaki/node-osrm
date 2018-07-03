@@ -1,0 +1,30 @@
+{
+  "name": "osrm-client",
+  "version": "1.0.0",
+  "private": false,
+  "description": "This is a Object-Oriented API client built on the top of node-osrm !",
+  "dependencies": {
+    "osrm": "^5.18.0",
+    "redis": "^2.8.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "Pooya Raki",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/PooyaRaki/node-osrm/issues"
+  },
+  "homepage": "https://github.com/PooyaRaki/node-osrm",
+  "engines": {
+    "node": ">=8.11.2"
+  },
+  "main": "app.js",
+  "keywords": [
+    "OSRM",
+    "OSRM Client",
+    "API Client"
+  ]
+}
