@@ -17,6 +17,8 @@ _config.core = {
     defaultResponseCode: 200,
     delimiter: ';',
     cache: true,
+    cacheEngine: 'redis',
+    cacheTime: 86400,
 	mapAddress: 'Your .osrm file address'
 };
 
@@ -24,10 +26,10 @@ _config.core = {
  * Redis Config
  */
 _config.redis = {
-    port: 6300,
+    port: '6300',
     password: '',
     host: '127.0.0.1',
-    dbindex: 1
+    dbIndex: 0
 };
 
 /**

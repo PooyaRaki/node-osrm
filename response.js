@@ -45,4 +45,16 @@ module.exports = class Response {
         server.write(result);
         server.end(); //end the response
     };
+
+    static manipulate(method, result) {
+        if( Config.core.routes.indexOf(method) !== -1 ) {
+            return Response[method](result);
+        }
+
+        return [];
+    }
+
+    static match(result) {
+        // console.log(result);
+    }
 };

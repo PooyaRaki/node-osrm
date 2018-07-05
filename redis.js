@@ -1,7 +1,6 @@
 'use strict';
 
 const pRedis = require('redis');
-const util = require('util');
 
 const Config = require('./config');
 
@@ -15,19 +14,21 @@ module.exports = class Redis {
      * Initialize a new redis connection.
      */
     constructor() {
-        if( Config.core.cache === true ) {
-            this.db = pRedis.createClient({
-                host: Config.redis.host,
-                port: Config.redis.port,
-                password: Config.redis.password
-            });
-            this.db.on('error', () => {
-                return false;
-            });
-            this.db.select(0);
-            this.getAsync = util.promisify(this.db.get).bind(this.db);
-            this.checkAsync = util.promisify(this.db.exists).bind(this.db);
-        }
+        this.db = pRedis.createClient({
+            host: Config.redis.host,
+            port: Config.redis.port,
+            password: Config.redis.password,
+            retry_strategy: (options) => {
+                if (options.error && options.attempt > 2) {
+                    return false;
+                }
+            }
+        });
+        this.db.on('error', (err) => {
+            return false;
+        }).on('ready', () => {
+            this.db.select(Config.redis.dbIndex);
+        });
     }
 
     /**
@@ -38,38 +39,30 @@ module.exports = class Redis {
      *
      * @returns {boolean}
      */
-    is(key, callback) {
-
-        if( Config.core.cache === false ) {
-            callback(null);
-
-            return false;
-        }
-
-        this.checkAsync(key).then( (result) => {
+    /*is(key, callback) {
+        this.checkAsync(key).then((result) => {
             callback(result);
-        }).catch( (err) => {
+        }).catch((err) => {
+            callback(null);
             return false;
-        } );
-    }
+        });
+    }*/
 
     /**
      * Fetch the given key.
      *
      * @param key
-     * @param callback
      */
-    fetch(key, callback) {
-        if( Config.core.cache === false ) {
-            callback(null);
-
-            return false;
-        }
-
-        this.getAsync(key).then( (result) => {
-            callback(result, undefined);
-        }).catch( (err) => {
-            return false;
+    get(key) {
+        return new Promise((resolve, reject) => {
+            this.db.get(key, (err, reply) => {
+                if( err || reply === null ) {
+                    reject(null);
+                } else {
+                    this.db.quit();
+                    resolve(reply);
+                }
+            });
         });
     }
 
@@ -79,14 +72,9 @@ module.exports = class Redis {
      * @param value
      * @param expiration Expiration Time Default is 1 Day = 86400 Seconds
      */
-    writeCache(key, value, expiration = 86400) {
-        if( Config.core.cache === false ) {
-
-            return false;
-        }
-
-        let result = this.db.setex(key, expiration, value);
+    set(key, value, expiration = undefined) {
+        expiration = expiration !== undefined ? expiration : Config.core.cacheTime;
+        this.db.set(key, value, 'EX', expiration);
         this.db.quit();
-        return result;
     }
 };

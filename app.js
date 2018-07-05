@@ -4,7 +4,7 @@ const OSRMObj = require('osrm');
 const Crypt = require('crypto');
 
 const text = require('./text');
-const Redis = require('./redis');
+const Cache = require('./cache');
 const Config = require('./config');
 const Response = require('./response');
 const OSRM = new OSRMObj(Config.core.mapAddress);
@@ -144,10 +144,6 @@ module.exports = class App {
         return Config.core.cache === true;
     }
 
-    processMatched() {
-
-    }
-
     /**
      * Initialize a new OSRM session.
      *
@@ -156,14 +152,11 @@ module.exports = class App {
      * @returns {boolean}
      */
     initOSRM(method, data) {
-        let RedisServer = new Redis();
-        RedisServer.is(this.token, (result) => {
+        let cacheServer = new Cache;
+        cacheServer.get(this.token, (result) => {
             if (result) {
-                RedisServer.fetch(this.token, (result, err) => {
-                    // let resp = Response.make(result);
-                    Response.write(this.server, result, undefined, {
-                        'Content-Length': Buffer.byteLength(result)
-                    });
+                Response.write(this.server, result, undefined, {
+                    'Content-Length': Buffer.byteLength(result)
                 });
             } else {
                 //Shared Variables
@@ -196,15 +189,11 @@ module.exports = class App {
                         return false;
                     }
 
-                    if( method === 'match' ) {
-                        result = this.processMatched(result);
-                    }
+                    /*if (data.process)
+                        result = Response.manipulate(method, result);*/
 
                     let resp = Response.make(result);
-                    if (App.isCache()) {
-                        let RedisServer = new Redis();
-                        RedisServer.writeCache(this.token, resp);
-                    }
+                    cacheServer.set(this.token, resp);
                     Response.write(this.server, resp, undefined, {
                         'Content-Length': Buffer.byteLength(resp)
                     });
@@ -212,7 +201,6 @@ module.exports = class App {
                 };
 
                 //Callback
-
                 if (method === 'match') {
                     OSRM.match(options, osrmCallback);
                 } else if (method === 'route') {

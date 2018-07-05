@@ -1,6 +1,5 @@
 'use strict';
 
-const Url = require('url');
 const Http = require('http');
 const Qs = require('querystring');
 
@@ -17,7 +16,7 @@ module.exports = class Server {
     static httpV1() {
         Http.createServer( (req, res) => {
             let obj = new App(req, res);
-            let route = Server.fetchUrl(req, true);
+            let route = Router.fetchUrl(req, true);
 
             if (!Router.validateRoute(route)) {
                 Response.write(res, App.error(null, 400), 400);
@@ -36,7 +35,7 @@ module.exports = class Server {
                 });
 
             } else if (req.method === 'GET') {
-                let data = Server.fetchUrl(req, false);
+                let data = Router.fetchUrl(req, false);
                 obj.initOSRM(method, data);
                 return true;
             } else {
@@ -53,18 +52,5 @@ module.exports = class Server {
     static httpV2() {
 
     }
-
-    /**
-     * Parses Url
-     *
-     * @param req
-     * @param pathname
-     * @returns {*}
-     */
-    static fetchUrl(req, pathname = false) {
-        let url_parts = Url.parse(req.url, true);
-
-        return ( pathname === true ) ? url_parts.pathname : url_parts.query;
-    };
 
 };
