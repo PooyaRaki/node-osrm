@@ -1,6 +1,6 @@
 {
   "name": "node-osrm",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": false,
   "description": "This is an Object-Oriented API client built on the top of node-osrm !",
   "dependencies": {
