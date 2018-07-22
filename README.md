@@ -2,6 +2,8 @@
 
 This is an Object-Oriented node-osrm api client!
 
+* Note that as installing OSRM is a bit tricky I have not included the osrm as a dependency but it is apparent that you need to install the latest version of OSRM manually.
+
 It is a piece of cake to run this client just make sure that you have already modified the config file with your own values:
 
     _config.core = {
